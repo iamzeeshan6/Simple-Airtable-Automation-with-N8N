@@ -1,0 +1,219 @@
+{
+  "name": "Automated Airtable",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1u1yUggTrlnkBhU_r2e2HaSMcjF85njrl",
+          "mode": "list",
+          "cachedResultName": "Test N8N Airtable",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1u1yUggTrlnkBhU_r2e2HaSMcjF85njrl"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b77173eb-ae5c-4b48-89a4-951419dc8aca",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vp4IipK1MiF7nQ4O",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8d299902-f91d-44cb-8e30-9af477b0021a",
+      "name": "Get a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "rBma5SzekyDJVc1M",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=In a few lines summarize the following:\n {{ $json.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6d80250f-f23f-475d-a12b-59a8118b25d0",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "che9u5mbNbTT5Saf",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appDWqZUesczfSrUz",
+          "mode": "list",
+          "cachedResultName": "Summarizer",
+          "cachedResultUrl": "https://airtable.com/appDWqZUesczfSrUz"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblWEK0d3TWb1GqIs",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appDWqZUesczfSrUz/tblWEK0d3TWb1GqIs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Summarized Content": "={{ $json.message.content }}",
+            "Email": "={{ $('Google Drive Trigger').item.json.lastModifyingUser.emailAddress }}",
+            "Name": "={{ $('Google Drive Trigger').item.json.name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Summarized Content",
+              "displayName": "Summarized Content",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "fbc688f0-5ca6-4ea1-9df0-8c95365de867",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JJunQk5b6Ohasvhs",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fdd200a6-1874-473e-9fd7-9d7fd2227d2a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6fe168f033e50cdabc808c7e9fbf0b9484d1749300fad4a5137cfae038345ed5"
+  },
+  "id": "Fx4QevrKxqXqmef8",
+  "tags": []
+}
